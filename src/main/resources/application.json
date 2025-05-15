@@ -1,0 +1,205 @@
+{
+	"server": {
+		"port": 8080,
+		"servlet": {
+			"contextPath": "/custom/erp"
+		}
+	},
+	"spring": {
+		"main": {
+			"allow-bean-definition-overriding": true
+		},
+		"application": {
+			"name": "comerzzia erp custom"
+		},
+		"messages": {
+			"basename": "i18n/messages,i18n/custom-messages"
+		},
+		"jackson": {
+			"serialization": {
+				"FAIL_ON_EMPTY_BEANS": false
+			}
+		},
+		"integration": {
+			"endpoint": {
+				"read-interval": 1000
+			},
+			"file": {
+				"autoCreateDirectory": true,
+				"useWatchService": true
+			},
+			"processed-files": {
+				"retention": 86400000
+			}
+		},
+		"security": {
+			"user": {
+				"name": "admin",
+				"password": "{noop}actmonitor",
+				"roles": "ACTUATOR_ADMIN"
+			}
+		}
+	},
+	"management": {
+		"server": {
+			"port": 8081,
+			"address": "127.0.0.1"
+		},
+		"endpoints": {
+			"web": {
+				"base-path": "/manage",
+				"exposure": {
+					"include": [
+						"health",
+						"info",
+						"metrics",
+						"prometheus",
+						"loggers",
+						"env",
+						"threaddump",
+						"httptrace",
+						"heapdump",
+						"beans",
+						"scheduledtasks",
+						"filemonitor"
+					]
+				}
+			}
+		},
+		"endpoint": {
+			"health": {
+				"show-details": "WHEN_AUTHORIZED",
+				"show-components": true,
+				"probes": {
+					"enabled": true
+				}
+			}
+		},
+		"info": {
+			"app": {
+				"name": "Comerzzia ERP Custom",
+				"description": "Aplicación de procesamiento de archivos para Comerzzia ERP",
+				"version": "1.0.0"
+			},
+			"java": {
+				"enabled": true
+			},
+			"env": {
+				"enabled": true
+			}
+		},
+		"metrics": {
+			"tags": {
+				"application": "${spring.application.name}"
+			},
+			"export": {
+				"prometheus": {
+					"enabled": true
+				}
+			},
+			"distribution": {
+				"percentiles-histogram": {
+					"http.server.requests": true
+				}
+			}
+		}
+	},
+	"file": {
+		"monitor": {
+			"scan-interval": 10000,
+			"max-files-per-batch": 10,
+			"processing-timeout": 300000,
+			"verify-directories-interval": 3600000,
+			"min-disk-space": 52428800
+		}
+	},
+	"logging": {
+		"level": {
+			"org.springframework.integration": "DEBUG",
+			"org.springframework.integration.file": "TRACE",
+			"com.comerzzia.custom.erp.monitor": "DEBUG",
+			"org.springframework.integration.endpoint.SourcePollingChannelAdapter": "INFO",
+			"org.springframework.messaging": "DEBUG"
+		},
+		"file": {
+			"name": "logs/application.log",
+			"max-size": "100MB",
+			"max-history": 30
+		}
+	},
+	"monitor": {
+		"scanInterval": 10000,
+		"entities": [
+			{
+				"type": "items",
+				"priority": 100,
+				"threads": 4,
+				"maxFilesPerBatch": 15,
+				"folder": "C:/comerzzia/monitor/items",
+				"serviceBean": "itemsService",
+				"processMethod": "processItems",
+				"dtoClass": "com.comerzzia.integrations.model.catalog.items.ItemsDTO"
+			},
+			{
+				"type": "promotions",
+				"priority": 50,
+				"threads": 2,
+				"maxFilesPerBatch": 10,
+				"folder": "C:/comerzzia/monitor/promotions",
+				"serviceBean": "promotionsService",
+				"processMethod": "processPromotions",
+				"dtoClass": "com.comerzzia.integrations.model.catalog.promotions.PromotionsDTO"
+			},
+			{
+				"type": "rates",
+				"priority": 50,
+				"threads": 2,
+				"maxFilesPerBatch": 10,
+				"folder": "C:/comerzzia/monitor/rates",
+				"serviceBean": "ratesService",
+				"processMethod": "processRates",
+				"dtoClass": "com.comerzzia.integrations.model.catalog.rates.RatesDTO"
+			},
+			{
+				"type": "warehouse",
+				"priority": 30,
+				"threads": 3,
+				"maxFilesPerBatch": 20,
+				"folder": "C:/comerzzia/monitor/warehouse",
+				"serviceBean": "warehouseService",
+				"processMethod": "processStocks",
+				"dtoClass": "com.comerzzia.integrations.model.warehouse.WarehouseItemsDTO"
+			},
+			{
+				"type": "sales",
+				"priority": 30,
+				"threads": 3,
+				"maxFilesPerBatch": 10,
+				"folder": "C:/comerzzia/monitor/sales",
+				"serviceBean": "salesService",
+				"processMethod": "processSales",
+				"dtoClass": "com.comerzzia.integrations.model.eticket.SalesDocumentsDTO"
+			},
+			{
+				"type": "salesfiles",
+				"priority": 30,
+				"threads": 2,
+				"maxFilesPerBatch": 5,
+				"folder": "C:/comerzzia/monitor/salesfiles",
+				"serviceBean": "salesFilesService",
+				"processMethod": "processSalesDoc",
+				"dtoClass": "com.comerzzia.integrations.model.sales.model.SalesDocumentsFilesDTO"
+			},
+			{
+				"type": "saleschannels",
+				"priority": 60,
+				"threads": 2,
+				"maxFilesPerBatch": 10,
+				"folder": "C:/comerzzia/monitor/saleschannels",
+				"serviceBean": "saleschannelsService",
+				"processMethod": "processSalesChannels",
+				"dtoClass": "com.comerzzia.integrations.model.catalog.saleschannels.SalesChannelsDTO"
+			}
+		]
+	}
+}
